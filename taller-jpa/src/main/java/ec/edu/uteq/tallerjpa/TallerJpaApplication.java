@@ -22,59 +22,63 @@ public class TallerJpaApplication {
     CommandLineRunner ejecutar(ProductoService service) {
         return args -> {
 
-            // -------------------------------
-            // Medición con nanoTime
-            // -------------------------------
+            System.out.println("=== VERSION SPRING DATA JPA ===");
+
+            // ------------------------------------------------------------
+            // 1. Medición con System.nanoTime()
+            // ------------------------------------------------------------
             long inicio = System.nanoTime();
 
-            List<Producto> productos = service.listar();
+            List<Producto> lista1 = service.listar();
 
             long fin = System.nanoTime();
 
+            double ms1 = (fin - inicio) / 1_000_000.0;
+
             System.out.printf(
-                    "nanoTime: %d productos en %.3f ms%n",
-                    productos.size(),
-                    (fin - inicio) / 1_000_000.0
+                    "nanoTime : %d filas en %.3f ms%n",
+                    lista1.size(),
+                    ms1
             );
 
-            // -------------------------------
-            // Medición con StopWatch
-            // -------------------------------
+            // ------------------------------------------------------------
+            // 2. Medición con Spring StopWatch
+            // ------------------------------------------------------------
             StopWatch sw = new StopWatch("listar-jpa");
 
-            sw.start("SELECT productos");
+            sw.start("SELECT * FROM productos");
 
-            service.listar();
+            List<Producto> lista2 = service.listar();
 
             sw.stop();
 
             System.out.printf(
-                    "StopWatch: %.3f ms%n",
+                    "StopWatch: %d filas en %.3f ms%n",
+                    lista2.size(),
                     sw.getTotalTimeNanos() / 1_000_000.0
             );
 
             System.out.println(sw.prettyPrint());
 
-            // -------------------------------
-            // Crear producto
-            // -------------------------------
+            // ------------------------------------------------------------
+            // 3. Crear producto
+            // ------------------------------------------------------------
             Producto nuevo = new Producto();
 
-            nuevo.setNombre("Producto JPA");
+            nuevo.setNombre("Producto de prueba");
             nuevo.setPrecio(new BigDecimal("99.99"));
-            nuevo.setStock(10);
+            nuevo.setStock(5);
 
             Producto creado = service.guardar(nuevo);
 
-            System.out.println("Creado ID: " + creado.getId());
+            System.out.println("Creado con id = " + creado.getId());
 
-            // -------------------------------
-            // Eliminar
-            // -------------------------------
+            // ------------------------------------------------------------
+            // 4. Eliminar producto
+            // ------------------------------------------------------------
             service.eliminar(creado.getId());
 
-            System.out.println("Producto eliminado.");
+            System.out.println("Eliminado: true");
         };
     }
-
 }
