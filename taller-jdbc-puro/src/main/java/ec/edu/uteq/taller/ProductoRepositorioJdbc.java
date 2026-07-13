@@ -84,4 +84,39 @@ public class ProductoRepositorioJdbc {
 
     }
 
+
+    public List<Producto> buscarPorNombreSeguro(String nombreBuscado)
+        throws SQLException {
+
+    String sql =
+            "SELECT id, nombre, precio, stock FROM productos WHERE nombre = ?";
+
+    List<Producto> resultado = new ArrayList<>();
+
+    try (
+            Connection con = Conexion.abrir();
+            PreparedStatement ps = con.prepareStatement(sql)
+    ) {
+
+        ps.setString(1, nombreBuscado);
+
+        try (ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+
+                resultado.add(new Producto(
+                        rs.getLong("id"),
+                        rs.getString("nombre"),
+                        rs.getBigDecimal("precio"),
+                        rs.getInt("stock")
+                ));
+
+            }
+
+        }
+
+    }
+
+    return resultado;
+}
 }
